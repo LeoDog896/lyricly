@@ -3,7 +3,7 @@ name = "lyricly"
 version = "0.1.0"
 edition = "2021"
 description = "CLI for getting lyrics from songs"
-license = "APACHE-2.0"
+license = "Apache-2.0"
 authors = ["Tristan F."]
 repository = "https://github.com/LeoDog896/lyricly/"
 
@@ -11,6 +11,5 @@ repository = "https://github.com/LeoDog896/lyricly/"
 
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
-
 reqwest = {version = "0.11", features = ["blocking"]}
 scraper = "0.13.0"
