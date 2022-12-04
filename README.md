@@ -1,22 +1,22 @@
-# lyrica
+# lyricly
 
 simple CLI for grabbing lyrics of your favourite songs;
 
 Usage:
 
 ```
-lyrica airplanes in the night sky are like shooting stars
+lyricly airplanes in the night sky are like shooting stars
 ```
 
 ## Installation
 
 ```sh
-cargo install lyrica
+cargo install lyricly
 ```
 
 ```sh
-git clone https://github.com/LeoDog896/lyrica
-cd lyrica
+git clone https://github.com/LeoDog896/lyricly
+cd lyricly
 cargo build --release
 ```
 

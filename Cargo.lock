@@ -587,7 +587,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lyrica"
+name = "lyricly"
 version = "0.1.0"
 dependencies = [
  "clap",
