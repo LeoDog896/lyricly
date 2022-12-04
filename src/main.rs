@@ -5,7 +5,7 @@ use clap::Parser;
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// The query of the song to get lyrics for.
-    song_query: String,
+    song_query: Vec<String>,
 }
 
 fn fetch_lyrics(url: String) -> String {
@@ -49,7 +49,7 @@ fn search(query: String) -> String {
 fn main() {
     let args = Args::parse();
 
-    let song_url = search(args.song_query);
+    let song_url = search(args.song_query.join(" "));
 
     let text_lyrics = fetch_lyrics(
         song_url,
