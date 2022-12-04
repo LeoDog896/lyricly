@@ -2,6 +2,10 @@
 name = "lyrica"
 version = "0.1.0"
 edition = "2021"
+description = "CLI for getting lyrics from songs"
+license = "APACHE-2.0"
+authors = ["Tristan F."]
+repository = "https://github.com/LeoDog896/lyrica/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
