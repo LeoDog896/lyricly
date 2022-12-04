@@ -16,7 +16,7 @@ fn fetch_lyrics(url: String) -> String {
 
     let document = scraper::Html::parse_document(&response);
 
-    let lyric_selector = scraper::Selector::parse(".lyrics__content__ok").unwrap();
+    let lyric_selector = scraper::Selector::parse(".lyrics__content__ok").expect("Failed to fetch lyrics: Selector failed");
 
     let lyrics = document.select(&lyric_selector).map(|x| x.inner_html());
 
@@ -35,11 +35,18 @@ fn search(query: String) -> String {
 
     let document = scraper::Html::parse_document(&response);
 
-    let song_selector = scraper::Selector::parse(".title").unwrap();
+    let song_selector = scraper::Selector::parse(".title").expect("Failed to search: Selector failed");
 
-    let song = document.select(&song_selector).next().unwrap();
+    let song = document.select(&song_selector).next();
 
-    let song_url = song.value().attr("href").unwrap();
+    if song.is_none() {
+        println!("No songs found for query: {}", query);
+        std::process::exit(1);
+    }
+
+    let song = song.unwrap();
+
+    let song_url = song.value().attr("href").expect("Failed to search: No href attribute found");
     
     let song_url = format!("https://www.musixmatch.com{}", song_url);
 
