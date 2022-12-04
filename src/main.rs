@@ -8,6 +8,17 @@ struct Args {
     song_query: Vec<String>,
 }
 
+fn strip_trailing_nl(input: &mut String) {
+    let new_len = input
+        .char_indices()
+        .rev()
+        .find(|(_, c)| !matches!(c, '\n' | '\r'))
+        .map_or(0, |(i, _)| i + 1);
+    if new_len != input.len() {
+        input.truncate(new_len);
+    }
+}
+
 fn fetch_lyrics(url: String) -> String {
     let response = reqwest::blocking::get(url)
         .expect("Failed to fetch lyrics: Initial request failed")
@@ -20,9 +31,11 @@ fn fetch_lyrics(url: String) -> String {
 
     let lyrics = document.select(&lyric_selector).map(|x| x.inner_html());
 
-    let text_lyrics = lyrics.collect::<Vec<_>>().join("\n").trim().to_string();
+    let lyrics_list = &mut lyrics.collect::<Vec<_>>().join("\n");
 
-    text_lyrics + "\n"
+    strip_trailing_nl(lyrics_list);
+
+    lyrics_list.to_owned() + "\n"
 }
 
 fn search(query: String) -> String {
