@@ -22,15 +22,15 @@ fn strip_trailing_nl(input: &mut String) {
 
 #[derive(Error, Debug)]
 pub enum LyricFetchError {
-    #[error("initial request failed")]
+    #[error("Initial request failed.")]
     InitialRequest,
-    #[error("request timed out")]
+    #[error("Request timed out.")]
     TimedOut,
-    #[error("selector failed to parse: {0}")]
+    #[error("Selector '{0}' failed to parse.")]
     SelectorFailed(String),
-    #[error("lyrics were restricted")]
+    #[error("Lyrics are restricted from public view.")]
     Restricted,
-    #[error("no lyrics were available")]
+    #[error("Lyrics are not available.")]
     NoLyrics
 }
 
@@ -103,19 +103,14 @@ fn search(query: String) -> String {
     song_url
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     let song_url = search(args.song_query.join(" "));
 
-    let text_lyrics = fetch_lyrics(&song_url);
-
-    if text_lyrics.is_err() {
-        eprintln!("{:?}", text_lyrics);
-        std::process::exit(1);
-    }
-
-    let text_lyrics = text_lyrics.unwrap();
+    let text_lyrics = fetch_lyrics(&song_url)?;
 
     println!("{}", text_lyrics + "\n");
+
+    Ok(())
 }

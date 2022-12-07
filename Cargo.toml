@@ -10,6 +10,7 @@ repository = "https://github.com/LeoDog896/lyricly/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.66"
 clap = { version = "4.0.29", features = ["derive"] }
 reqwest = {version = "0.11", features = ["blocking"]}
 scraper = "0.13.0"
