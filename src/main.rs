@@ -1,4 +1,5 @@
 use clap::Parser;
+use thiserror::Error;
 
 /// Get lyrics from various songs.
 #[derive(Parser, Debug)]
@@ -19,27 +20,41 @@ fn strip_trailing_nl(input: &mut String) {
     }
 }
 
-fn fetch_lyrics(url: &str) -> String {
+#[derive(Error, Debug)]
+pub enum LyricFetchError {
+    #[error("initial request failed")]
+    InitialRequest,
+    #[error("request timed out")]
+    TimedOut,
+    #[error("selector failed to parse: {0}")]
+    SelectorFailed(String),
+    #[error("lyrics were restricted")]
+    Restricted,
+    #[error("no lyrics were available")]
+    NoLyrics
+}
+
+fn fetch_lyrics(url: &str) -> Result<String, LyricFetchError> {
     let response = reqwest::blocking::get(url)
-        .expect("Failed to fetch lyrics: Initial request failed")
+        .map_err(|_| LyricFetchError::InitialRequest)?
         .text()
-        .expect("Failed to fetch lyrics: Request for text timed out");
+        .map_err(|_| LyricFetchError::TimedOut)?;
 
     let document = scraper::Html::parse_document(&response);
 
     // checking for restricted lyrics
     {
         let restricted_selector = scraper::Selector::parse(".mxm-lyrics-not-available")
-            .expect("Failed to fetch lyrics: Restricted selector failed");
+            .map_err(|_| LyricFetchError::SelectorFailed(".mxm-lyrics-not-available".to_string()))?;
 
         let mut restricted_text = document.select(&restricted_selector);
 
         if restricted_text.next().is_some() {
-            panic!("Failed to fetch lyrics: Lyrics are restricted")
+            return Err(LyricFetchError::Restricted)
         }
-    }
+    };
     let lyric_selector = scraper::Selector::parse(".lyrics__content__ok")
-        .expect("Failed to fetch lyrics: Lyrical selector failed");
+        .map_err(|_| LyricFetchError::SelectorFailed(".lyrics__content__ok".to_string()))?;
 
     let lyrics = document.select(&lyric_selector);
 
@@ -50,10 +65,10 @@ fn fetch_lyrics(url: &str) -> String {
     strip_trailing_nl(lyrics_list);
 
     if lyrics_list.is_empty() {
-        eprintln!("No lyrics found for {}.", url);
+        return Err(LyricFetchError::NoLyrics);
     }
 
-    lyrics_list.to_owned() + "\n"
+    Ok(lyrics_list.to_owned() + "\n")
 }
 
 fn search(query: String) -> String {
@@ -94,6 +109,13 @@ fn main() {
     let song_url = search(args.song_query.join(" "));
 
     let text_lyrics = fetch_lyrics(&song_url);
+
+    if text_lyrics.is_err() {
+        eprintln!("{:?}", text_lyrics);
+        std::process::exit(1);
+    }
+
+    let text_lyrics = text_lyrics.unwrap();
 
     println!("{}", text_lyrics + "\n");
 }
