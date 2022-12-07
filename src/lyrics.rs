@@ -1,16 +1,5 @@
 use thiserror::Error;
 
-fn strip_trailing_nl(input: &mut String) {
-    let new_len = input
-        .char_indices()
-        .rev()
-        .find(|(_, c)| !matches!(c, '\n' | '\r'))
-        .map_or(0, |(i, _)| i + 1);
-    if new_len != input.len() {
-        input.truncate(new_len);
-    }
-}
-
 #[derive(Error, Debug)]
 pub enum LyricFetchError {
     #[error("Initial request failed.")]
@@ -19,7 +8,7 @@ pub enum LyricFetchError {
     TimedOut,
     #[error("Selector '{0}' failed to parse.")]
     SelectorFailed(String),
-    #[error("Lyrics are restricted from public view.")]
+    #[error("Lyrics are not available for public use.")]
     Restricted,
     #[error("Lyrics are not available.")]
     NoLyrics,
@@ -55,7 +44,7 @@ pub fn fetch(url: &str) -> Result<String, LyricFetchError> {
 
     let lyrics_list = &mut lyrics.collect::<Vec<_>>().join("\n");
 
-    strip_trailing_nl(lyrics_list);
+    let lyrics_list = lyrics_list.trim();
 
     if lyrics_list.is_empty() {
         return Err(LyricFetchError::NoLyrics);
