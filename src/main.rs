@@ -19,7 +19,7 @@ fn strip_trailing_nl(input: &mut String) {
     }
 }
 
-fn fetch_lyrics(url: String) -> String {
+fn fetch_lyrics(url: &str) -> String {
     let response = reqwest::blocking::get(url)
         .expect("Failed to fetch lyrics: Initial request failed")
         .text()
@@ -27,13 +27,31 @@ fn fetch_lyrics(url: String) -> String {
 
     let document = scraper::Html::parse_document(&response);
 
-    let lyric_selector = scraper::Selector::parse(".lyrics__content__ok").expect("Failed to fetch lyrics: Selector failed");
+    // checking for restricted lyrics
+    {
+        let restricted_selector = scraper::Selector::parse(".mxm-lyrics-not-available")
+            .expect("Failed to fetch lyrics: Restricted selector failed");
 
-    let lyrics = document.select(&lyric_selector).map(|x| x.inner_html());
+        let mut restricted_text = document.select(&restricted_selector);
+
+        if restricted_text.next().is_some() {
+            panic!("Failed to fetch lyrics: Lyrics are restricted")
+        }
+    }
+    let lyric_selector = scraper::Selector::parse(".lyrics__content__ok")
+        .expect("Failed to fetch lyrics: Lyrical selector failed");
+
+    let lyrics = document.select(&lyric_selector);
+
+    let lyrics = lyrics.map(|x| x.inner_html());
 
     let lyrics_list = &mut lyrics.collect::<Vec<_>>().join("\n");
 
     strip_trailing_nl(lyrics_list);
+
+    if lyrics_list.is_empty() {
+        eprintln!("No lyrics found for {}.", url);
+    }
 
     lyrics_list.to_owned() + "\n"
 }
@@ -48,19 +66,23 @@ fn search(query: String) -> String {
 
     let document = scraper::Html::parse_document(&response);
 
-    let song_selector = scraper::Selector::parse(".title").expect("Failed to search: Selector failed");
+    let song_selector =
+        scraper::Selector::parse(".title").expect("Failed to search: Selector failed");
 
     let song = document.select(&song_selector).next();
 
     if song.is_none() {
-        println!("No songs found for query: {}", query);
+        eprintln!("No songs found for query: {}", query);
         std::process::exit(1);
     }
 
     let song = song.unwrap();
 
-    let song_url = song.value().attr("href").expect("Failed to search: No href attribute found");
-    
+    let song_url = song
+        .value()
+        .attr("href")
+        .expect("Failed to search: No href attribute found");
+
     let song_url = format!("https://www.musixmatch.com{}", song_url);
 
     song_url
@@ -71,9 +93,7 @@ fn main() {
 
     let song_url = search(args.song_query.join(" "));
 
-    let text_lyrics = fetch_lyrics(
-        song_url,
-    );
+    let text_lyrics = fetch_lyrics(&song_url);
 
     println!("{}", text_lyrics + "\n");
 }
