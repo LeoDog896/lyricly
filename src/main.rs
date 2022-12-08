@@ -13,7 +13,7 @@ struct Args {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let song_url = search::query(args.song_query.join(" "))?;
+    let song_url = search::query(&args.song_query.join(" "))?;
 
     let text_lyrics = lyrics::fetch(&song_url)?;
 

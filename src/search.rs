@@ -12,7 +12,7 @@ pub enum LyricSearchError {
     NoSongs,
 }
 
-pub fn query(input: String) -> Result<String, LyricSearchError> {
+pub fn query(input: &str) -> Result<String, LyricSearchError> {
     let url = format!("https://www.musixmatch.com/search/{}", input);
 
     let response = reqwest::blocking::get(url)
