@@ -24,9 +24,13 @@ cd lyricly
 cargo build --release
 ```
 
-## License
+## Sources
 
-Apache-2.0
+All sources are currently taken from [Musixmatch](musixmatch.com/). I am planning to add Youtube Music, Genius and LyricWiki in the future.
+
+## License and Legal
+
+License is `Apache-2.0` (standard license for Rust projects). Since this application uses lyrics from various sources, do note that this is meant for personal use only.
 
 ## Contribution
 
