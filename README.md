@@ -26,7 +26,7 @@ cargo build --release
 
 ## Sources
 
-All sources are currently taken from [Musixmatch](musixmatch.com/). I am planning to add Youtube Music, Genius and LyricWiki in the future.
+All sources are currently taken from [Musixmatch](musixmatch.com/). I am planning to add Youtube Music and Genius in the future.
 
 ## License and Legal
 
