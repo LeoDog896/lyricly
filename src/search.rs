@@ -22,8 +22,8 @@ pub fn query(input: &str) -> Result<String, LyricSearchError> {
 
     let document = scraper::Html::parse_document(&response);
 
-    let song_selector =
-        scraper::Selector::parse(".title").map_err(|_| LyricSearchError::SelectorFailed("title".to_string()))?;
+    let song_selector = scraper::Selector::parse(".title")
+        .map_err(|_| LyricSearchError::SelectorFailed("title".to_string()))?;
 
     let song = document.select(&song_selector).next();
 
