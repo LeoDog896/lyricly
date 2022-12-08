@@ -1,21 +1,34 @@
-pub fn query(input: String) -> String {
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum LyricSearchError {
+    #[error("Initial request failed.")]
+    InitialRequest,
+    #[error("Request timed out.")]
+    TimedOut,
+    #[error("Selector '{0}' failed to parse.")]
+    SelectorFailed(String),
+    #[error("No songs were found.")]
+    NoSongs,
+}
+
+pub fn query(input: String) -> Result<String, LyricSearchError> {
     let url = format!("https://www.musixmatch.com/search/{}", input);
 
     let response = reqwest::blocking::get(url)
-        .expect("Failed to search: Initial request failed")
+        .map_err(|_| LyricSearchError::InitialRequest)?
         .text()
-        .expect("Failed to search: Request for text timed out");
+        .map_err(|_| LyricSearchError::TimedOut)?;
 
     let document = scraper::Html::parse_document(&response);
 
     let song_selector =
-        scraper::Selector::parse(".title").expect("Failed to search: Selector failed");
+        scraper::Selector::parse(".title").map_err(|_| LyricSearchError::SelectorFailed("title".to_string()))?;
 
     let song = document.select(&song_selector).next();
 
     if song.is_none() {
-        eprintln!("No songs found for query: {}", input);
-        std::process::exit(1);
+        return Err(LyricSearchError::NoSongs);
     }
 
     let song = song.unwrap();
@@ -27,5 +40,5 @@ pub fn query(input: String) -> String {
 
     let song_url = format!("https://www.musixmatch.com{}", song_url);
 
-    song_url
+    Ok(song_url)
 }
