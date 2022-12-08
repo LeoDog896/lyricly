@@ -10,9 +10,13 @@ lyricly airplanes in the night sky are like shooting stars
 
 ## Installation
 
+### Cargo
+
 ```sh
 cargo install lyricly
 ```
+
+### Manual
 
 ```sh
 git clone https://github.com/LeoDog896/lyricly
